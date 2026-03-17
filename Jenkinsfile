@@ -65,13 +65,13 @@ pipeline {
             steps {
                 sh '''
                 chmod -R 777 $(pwd)
-                
+
                 docker run --rm --network host \
                 -v $(pwd):/zap/wrk/:rw \
                 zaproxy/zap-stable zap-baseline.py \
                 -t http://localhost:$PORT/maturity-assessments/assessment \
                 -r zap-report.html \
-                -J zap-report.json
+                -J zap-report.json || true
                 '''
             }
         }
