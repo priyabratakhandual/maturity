@@ -67,6 +67,7 @@ pipeline {
                 chmod -R 777 $(pwd)
 
                 docker run --rm --network host \
+                -u $(id -u):$(id -g) \
                 -v $(pwd):/zap/wrk/:rw \
                 zaproxy/zap-stable zap-baseline.py \
                 -t http://localhost:$PORT/maturity-assessments/assessment \
