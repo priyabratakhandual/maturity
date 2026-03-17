@@ -66,7 +66,7 @@ pipeline {
                 sh '''
                 docker run --rm --network host \
                 -v $(pwd):/zap/wrk/:rw \
-                owasp/zap2docker-stable zap-baseline.py \
+                zaproxy/zap-stable zap-baseline.py \
                 -t http://localhost:$PORT/maturity-assessments/assessment \
                 -r zap-report.html \
                 -J zap-report.json
