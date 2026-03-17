@@ -40,6 +40,26 @@ pipeline {
             }
         }
 
+        stage('Wait for App') {
+            steps {
+                sh '''
+                echo "Waiting for app to start..."
+
+                for i in {1..10}; do
+                  if curl -s http://localhost:$PORT > /dev/null; then
+                    echo "App is up!"
+                    exit 0
+                  fi
+                  echo "Retrying..."
+                  sleep 5
+                done
+
+                echo "App failed to start"
+                exit 1
+                '''
+            }
+        }
+
         stage('OWASP ZAP Scan') {
             steps {
                 sh '''
@@ -47,7 +67,8 @@ pipeline {
                 -v $(pwd):/zap/wrk/:rw \
                 owasp/zap2docker-stable zap-baseline.py \
                 -t http://localhost:$PORT \
-                -r zap-report.html
+                -r zap-report.html \
+                -J zap-report.json
                 '''
             }
         }
@@ -55,7 +76,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'zap-report.html', allowEmptyArchive: true
+            archiveArtifacts artifacts: '*.html, *.json', allowEmptyArchive: true
         }
     }
 }
