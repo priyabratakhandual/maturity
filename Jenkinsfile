@@ -64,6 +64,8 @@ pipeline {
         stage('OWASP ZAP Scan') {
             steps {
                 sh '''
+                chmod -R 777 $(pwd)
+                
                 docker run --rm --network host \
                 -v $(pwd):/zap/wrk/:rw \
                 zaproxy/zap-stable zap-baseline.py \
