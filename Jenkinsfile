@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "priyabratakhandual/globtier-maturity-assessment"
+        IMAGE_NAME = "priyabratakhandual/globtier-maturity-assessment:1.0"
         CONTAINER_NAME = "maturity-app"
         PORT = "7000"
     }
