@@ -46,7 +46,7 @@ pipeline {
                 echo "Waiting for app to start..."
 
                 for i in {1..10}; do
-                  if curl -s http://localhost:$PORT > /dev/null; then
+                  if curl -s http://localhost:$PORT/maturity-assessments/assessment > /dev/null; then
                     echo "App is up!"
                     exit 0
                   fi
@@ -66,7 +66,7 @@ pipeline {
                 docker run --rm --network host \
                 -v $(pwd):/zap/wrk/:rw \
                 owasp/zap2docker-stable zap-baseline.py \
-                -t http://localhost:$PORT \
+                -t http://localhost:$PORT/maturity-assessments/assessment \
                 -r zap-report.html \
                 -J zap-report.json
                 '''
