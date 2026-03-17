@@ -64,7 +64,7 @@ pipeline {
         stage('OWASP ZAP Scan') {
             steps {
                 sh '''
-                
+                mkdir -p /tmp/zap-work
 
                 docker run --rm --network host \
                 -u $(id -u):$(id -g) \
@@ -73,6 +73,7 @@ pipeline {
                 -t http://localhost:$PORT/maturity-assessments/assessment \
                 -r zap-report.html \
                 -J zap-report.json || true
+                cp /tmp/zap-work/* .
                 '''
             }
         }
