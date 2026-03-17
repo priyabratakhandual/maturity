@@ -45,16 +45,17 @@ pipeline {
                 sh '''
                 echo "Waiting for app to start..."
 
-                for i in {1..10}; do
+                for i in $(seq 1 20); do
                   if curl -s http://localhost:$PORT/maturity-assessments/assessment > /dev/null; then
                     echo "App is up!"
                     exit 0
                   fi
-                  echo "Retrying..."
-                  sleep 5
+                  echo "Retry $i..."
+                  sleep 3
                 done
 
                 echo "App failed to start"
+                docker logs $CONTAINER_NAME
                 exit 1
                 '''
             }
