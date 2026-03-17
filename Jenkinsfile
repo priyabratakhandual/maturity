@@ -64,7 +64,7 @@ pipeline {
         stage('OWASP ZAP Scan') {
             steps {
                 sh '''
-                chmod -R 777 $(pwd)
+                
 
                 docker run --rm --network host \
                 -u $(id -u):$(id -g) \
