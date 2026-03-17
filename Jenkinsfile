@@ -74,7 +74,7 @@ pipeline {
                 -t http://localhost:$PORT/maturity-assessments/assessment \
                 -r zap-report.html \
                 -J zap-report.json || true
-                cp /tmp/zap-work/* .
+                
                 '''
             }
         }
