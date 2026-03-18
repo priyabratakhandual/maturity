@@ -35,7 +35,11 @@ pipeline {
                 docker stop $CONTAINER_NAME || true
                 docker rm $CONTAINER_NAME || true
 
-                docker run -d -p $PORT:$PORT --name $CONTAINER_NAME $IMAGE_NAME
+                docker run -d \
+                  -p $PORT:$PORT \
+                  --name $CONTAINER_NAME \
+                  --label com.datadoghq.ad.logs='[{"source":"python","service":"maturity-app"}]' \
+                  $IMAGE_NAME
                 '''
             }
         }
