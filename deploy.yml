@@ -1,5 +1,6 @@
 - name: Deploy Docker container
-  hosts: workers
+  hosts: localhost
+  connection: local
   become: yes
 
   vars:
