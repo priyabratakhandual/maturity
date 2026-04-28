@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'worker2' }
+    agent any
 
     stages {
         stage('Check Node') {
