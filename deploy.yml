@@ -3,7 +3,7 @@
   become: yes
 
   vars:
-    image_name: priyabratakhandual/globtier-maturity-assessment:latest
+    image_name: priyabratakhandual/globtier-maturity-assessment:1.0
     container_name: maturity-app
 
   tasks:
