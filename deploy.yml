@@ -1,0 +1,26 @@
+- name: Deploy Docker container
+  hosts: workers
+  become: yes
+
+  vars:
+    image_name: priyabratakhandual/globtier-maturity-assessment:latest
+    container_name: maturity-app
+
+  tasks:
+    - name: Pull latest image
+      command: docker pull {{ image_name }}
+
+    - name: Stop old container
+      command: docker stop {{ container_name }}
+      ignore_errors: yes
+
+    - name: Remove old container
+      command: docker rm {{ container_name }}
+      ignore_errors: yes
+
+    - name: Run new container
+      command: >
+        docker run -d
+        --name {{ container_name }}
+        -p 7000:7000
+        {{ image_name }}
