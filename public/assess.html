@@ -1,0 +1,1180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Globtier Maturity Assessments</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;margin:0;background:#ffffff;color:#212529;line-height:1.6;min-height:100vh}
+    .logo-white-space{max-height:60px;max-width:200px;object-fit:contain;filter:none;display:block;margin:0 auto 1rem}
+    .logo-with-text{display:flex;flex-direction:column;align-items:center;gap:0.5rem;margin-bottom:1.5rem}
+    .company-title{font-size:1.6rem;font-weight:bold;color:#000000;margin:0}
+    .company-tagline{font-size:0.85rem;color:#666;margin:0;line-height:1.4}
+    section{max-width:1000px;margin:2rem auto;padding:2.5rem;background:#ffffff;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.1)}
+    section h2{color:#212529}
+    section h3{color:#212529}
+    .quiz-container{display:flex;gap:3rem;align-items:flex-start}
+    .quiz-content{flex:1;max-width:none}
+    .question-progress-section{flex-shrink:0;width:200px;text-align:center}
+    .question-progress-title{font-size:0.85rem;color:#666;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem}
+    .question-progress-circular{width:180px;height:180px;margin:0 auto;position:relative}
+    .question-progress-circular svg{transform:rotate(-90deg);width:100%;height:100%}
+    .question-progress-circular circle{fill:none;stroke-width:12;stroke-linecap:round}
+    .question-progress-circular .bg-circle{stroke:#e0e0e0}
+    .question-progress-circular .progress-circle{stroke:url(#progressGradient);transition:stroke-dashoffset 0.5s ease}
+    .question-progress-circular .count{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);font-size:2rem;font-weight:700;color:#000000}
+    .question-progress-circular .total-label{position:absolute;top:58%;left:50%;transform:translateX(-50%);font-size:0.9rem;color:#666;font-weight:500}
+    .question-progress-percentage{text-align:center;margin-top:1rem;font-size:1rem;color:#666;font-weight:500}
+    .question-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;padding-bottom:1rem;border-bottom:2px solid #e0e0e0}
+    .question-number{font-size:0.95rem;color:#ffffff;font-weight:600;background:#000000;padding:0.5rem 1rem;border-radius:20px}
+    .question-text{font-size:1.4rem;font-weight:500;color:#212529;line-height:1.5;margin:1.5rem 0}
+    .rating-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin:2rem 0}
+    .rating-btn{
+      width:100%;
+      padding:1.2rem 0.8rem;
+      border:2px solid #404040;
+      border-radius:12px;
+      background:#1a1a1a;
+      text-align:center;
+      cursor:pointer;
+      transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size:1.1rem;
+      font-weight:600;
+      color:#ffffff;
+      box-shadow:0 2px 8px rgba(0,0,0,0.1);
+      position:relative;
+      overflow:hidden
+    }
+    .rating-btn:hover{
+      border-color:#666666;
+      background:#2d2d2d;
+      transform:translateY(-3px);
+      box-shadow:0 6px 16px rgba(0,0,0,0.3)
+    }
+    .rating-btn.selected{
+      border-color:#666666;
+      background:#666666;
+      color:#ffffff;
+      box-shadow:0 6px 20px rgba(0,0,0,0.3);
+      transform:translateY(-3px) scale(1.03)
+    }
+    .rating-btn small{
+      display:block;
+      font-size:0.8rem;
+      font-weight:500;
+      margin-top:0.4rem;
+      opacity:0.85;
+      color:#ffffff
+    }
+    .rating-btn.selected small{
+      opacity:1;
+      font-weight:600;
+      color:#ffffff
+    }
+    .circular-progress{
+      width:180px;
+      height:180px;
+      margin:0 auto;
+      position:relative
+    }
+    .circular-progress svg{
+      transform:rotate(-90deg);
+      width:100%;
+      height:100%
+    }
+    .circular-progress circle{
+      fill:none;
+      stroke-width:12;
+      stroke-linecap:round
+    }
+    .circular-progress .bg-circle{
+      stroke:#e0e0e0
+    }
+    .circular-progress .progress-circle{
+      stroke:url(#gradient);
+      stroke-dasharray:282.74;
+      stroke-dashoffset:282.74;
+      transition:stroke-dashoffset 0.5s ease
+    }
+    .circular-progress .percentage{
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      font-size:2.5rem;
+      font-weight:700;
+      background:linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text
+    }
+    .circular-progress .label{
+      position:absolute;
+      top:65%;
+      left:50%;
+      transform:translateX(-50%);
+      font-size:0.85rem;
+      color:#666;
+      font-weight:500
+    }
+    button{background:linear-gradient(135deg, #000000 0%, #1a1a1a 100%);color:#fff;border:0;padding:1rem 2.5rem;border-radius:12px;cursor:pointer;font-size:1.1rem;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,0.5);transition:all 0.3s ease;text-transform:uppercase;letter-spacing:0.5px}
+    button:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,0.6);filter:brightness(1.05)}
+    button:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+    input{width:100%;padding:.6rem;margin:.4rem 0;border:1px solid #ced4da;border-radius:4px;background:#ffffff;color:#212529}
+    input::placeholder{color:#999}
+    input::-webkit-input-placeholder{color:#999}
+    input::-moz-placeholder{color:#999}
+    input:-ms-input-placeholder{color:#999}
+    input.invalid{border-color:#dc3545;background:#fff5f5}
+    .error-message{color:#dc3545;font-size:0.85rem;margin:0.2rem 0 0.5rem;display:none}
+    .error-message.show{display:block}
+    .form-help{font-size:0.85rem;color:#666;margin:0.2rem 0 0.5rem}
+    select option{background:#ffffff;color:#212529}
+    #ai-out h2,#ai-out h3{margin-top:1.2rem}
+    .hide{display:none}
+    .loader-container{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem 2rem;min-height:400px}
+    .loader-spinner{width:80px;height:80px;position:relative;margin-bottom:2rem}
+    .loader-spinner::before,.loader-spinner::after{content:'';position:absolute;border:4px solid transparent;border-top-color:#000000;border-radius:50%;animation:spin 1s linear infinite}
+    .loader-spinner::before{width:80px;height:80px;top:0;left:0}
+    .loader-spinner::after{width:60px;height:60px;top:10px;left:10px;animation-duration:0.8s;animation-direction:reverse;border-top-color:#666666}
+    .loader-dots{display:flex;gap:0.5rem;margin-bottom:1.5rem}
+    .loader-dot{width:12px;height:12px;background:#000000;border-radius:50%;animation:pulse 1.4s ease-in-out infinite}
+    .loader-dot:nth-child(1){animation-delay:0s}
+    .loader-dot:nth-child(2){animation-delay:0.2s}
+    .loader-dot:nth-child(3){animation-delay:0.4s}
+    .loader-text{font-size:1.2rem;font-weight:600;color:#212529;margin-bottom:0.5rem;text-align:center}
+    .loader-subtext{font-size:0.95rem;color:#666;text-align:center;max-width:400px}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    @keyframes pulse{0%,100%{opacity:0.3;transform:scale(0.8)}50%{opacity:1;transform:scale(1.2)}}
+    .chart-container{position:relative;height:300px;margin:1.5rem 0;background:#ffffff;padding:1rem;border-radius:6px;border:1px solid #e9ecef}
+    .chart-container h4{margin-top:0;color:#000000;font-size:1rem}
+    .visualization-section{margin:2rem 0;padding:1.5rem;background:#f8f9fa;border-radius:8px;border-left:4px solid #000000}
+    .visualization-section h3{margin-top:0;border-bottom:2px solid #000000;padding-bottom:0.5rem}
+    .score-comparison{display:flex;gap:2rem;margin:1rem 0;flex-wrap:wrap}
+    .score-box{flex:1;min-width:150px;padding:1rem;background:#ffffff;border-radius:6px;text-align:center;border:2px solid #e9ecef}
+    .score-box.you{border-color:#000000;background:#f8f9fa}
+    .score-box.industry{border-color:#28a745;background:#1a2e1a}
+    .score-value{font-size:2rem;font-weight:bold;color:#000000;margin:0.5rem 0}
+    .score-label{font-size:0.9rem;color:#666;text-transform:uppercase}
+    @media print{header,.hide-print{display:none}body{background:#fff}section{box-shadow:none;border:1px solid #ccc}.chart-container{page-break-inside:avoid}}
+    @media (max-width:768px){
+      .quiz-container{flex-direction:column;gap:2rem}
+      .progress-indicator{width:100%;display:flex;justify-content:center}
+      .question-text{font-size:1.2rem}
+      .rating-grid{gap:0.6rem}
+      .rating-btn{padding:1rem 0.5rem;font-size:1rem}
+    }
+  </style>
+</head>
+<body>
+<section id="gate" class="active">
+  <div class="logo-with-text">
+    <img src="https://botgobucket.s3.ap-south-1.amazonaws.com/maturity-assessment/glb-logo.png" alt="Globtier Logo" class="logo-white-space" onerror="this.style.display='none'">
+    <h1 class="company-title">Globtier Maturity Assessment</h1>
+    <p class="company-tagline">Benchmark yourself in 2 min - get an report by AI generated Agent</p>
+  </div>
+  <h2 style="color:#212529">Get your personalised report</h2>
+  <p style="color:#666;margin-bottom:1.5rem">Please provide your information to begin the assessment</p>
+  <form id="lead">
+    <input name="name" placeholder="Full name" required>
+    <div>
+      <input name="email" id="emailInput" type="email" placeholder="Work email (company domain only)" required>
+      <p class="error-message" id="emailError">Please use a company email address. Personal emails (Gmail, Yahoo, Hotmail, etc.) are not accepted.</p>
+      <p class="form-help">We only accept official company email addresses</p>
+    </div>
+    <input name="company" placeholder="Company name" required>
+    <select name="industry" required style="width:100%;padding:.6rem;margin:.4rem 0;border:1px solid #ced4da;border-radius:4px;background:#ffffff;color:#212529">
+      <option value="" style="background:#ffffff;color:#212529">Select Industry Type</option>
+      <option value="Technology">Technology</option>
+      <option value="Education">Education</option>
+      <option value="Healthcare">Healthcare</option>
+      <option value="Finance">Finance</option>
+      <option value="Manufacturing">Manufacturing</option>
+      <option value="Retail">Retail</option>
+      <option value="Government">Government</option>
+      <option value="Non-Profit">Non-Profit</option>
+      <option value="Consulting">Consulting</option>
+      <option value="Other">Other</option>
+    </select>
+    <select name="employeeCount" required style="width:100%;padding:.6rem;margin:.4rem 0;border:1px solid #ced4da;border-radius:4px;background:#ffffff;color:#212529">
+      <option value="" style="background:#ffffff;color:#212529">Number of Employees</option>
+      <option value="1-10">1-10</option>
+      <option value="11-50">11-50</option>
+      <option value="51-200">51-200</option>
+      <option value="201-500">201-500</option>
+      <option value="501-1000">501-1,000</option>
+      <option value="1001-5000">1,001-5,000</option>
+      <option value="5001+">5,001+</option>
+    </select>
+    <select name="annualRevenue" required style="width:100%;padding:.6rem;margin:.4rem 0;border:1px solid #ced4da;border-radius:4px;background:#ffffff;color:#212529">
+      <option value="" style="background:#ffffff;color:#212529">Annual Revenue / Turnover</option>
+      <option value="Under ₹1Cr">Under ₹1Cr</option>
+      <option value="₹1Cr-₹10Cr">₹1Cr-₹10Cr</option>
+      <option value="₹10Cr-₹50Cr">₹10Cr-₹50Cr</option>
+      <option value="₹50Cr-₹100Cr">₹50Cr-₹100Cr</option>
+      <option value="₹100Cr-₹500Cr">₹100Cr-₹500Cr</option>
+      <option value="₹500Cr-₹1000Cr">₹500Cr-₹1000Cr</option>
+      <option value="Over ₹1000Cr">Over ₹1000Cr</option>
+    </select>
+    <button type="submit" id="startBtn" disabled>Start Assessment</button>
+  </form>
+</section>
+
+<section id="quiz" class="hide">
+  <div class="logo-with-text">
+    <img src="https://botgobucket.s3.ap-south-1.amazonaws.com/maturity-assessment/glb-logo.png" alt="Globtier Logo" class="logo-white-space" onerror="this.style.display='none'">
+    <h1 class="company-title">Globtier Maturity Assessment</h1>
+    <p class="company-tagline">Benchmark yourself in 2 min - get an report by AI generated Agent</p>
+  </div>
+  <div class="progress-bar"><div class="progress" id="progress"></div></div>
+  <div id="qbox"></div>
+  <button id="next" class="hide-print">Next</button>
+</section>
+
+<section id="budget" class="hide">
+  <div class="logo-with-text">
+    <img src="https://botgobucket.s3.ap-south-1.amazonaws.com/maturity-assessment/glb-logo.png" alt="Globtier Logo" class="logo-white-space" onerror="this.style.display='none'">
+    <h1 class="company-title">Globtier Maturity Assessment</h1>
+    <p class="company-tagline">Almost done! Just a few more questions</p>
+  </div>
+  <h2 style="color:#212529">Budget & Implementation Details</h2>
+  <p style="color:#666;margin-bottom:1.5rem">Help us provide more accurate recommendations</p>
+  <form id="budgetForm">
+    <select name="projectBudget" required style="width:100%;padding:.6rem;margin:.4rem 0;border:1px solid #ced4da;border-radius:4px;background:#ffffff;color:#212529">
+      <option value="" style="background:#ffffff;color:#212529">Estimated Budget for This Initiative</option>
+      <option value="Under ₹5L">Under ₹5L</option>
+      <option value="₹5L-₹10L">₹5L-₹10L</option>
+      <option value="₹10L-₹25L">₹10L-₹25L</option>
+      <option value="₹25L-₹50L">₹25L-₹50L</option>
+      <option value="₹50L-₹1Cr">₹50L-₹1Cr</option>
+      <option value="Over ₹1Cr">Over ₹1Cr</option>
+      <option value="Not determined yet">Not determined yet</option>
+    </select>
+    <select name="timeline" required style="width:100%;padding:.6rem;margin:.4rem 0;border:1px solid #ced4da;border-radius:4px;background:#ffffff;color:#212529">
+      <option value="" style="background:#ffffff;color:#212529">Expected Implementation Timeline</option>
+      <option value="Immediate (0-3 months)">Immediate (0-3 months)</option>
+      <option value="Short-term (3-6 months)">Short-term (3-6 months)</option>
+      <option value="Medium-term (6-12 months)">Medium-term (6-12 months)</option>
+      <option value="Long-term (12+ months)">Long-term (12+ months)</option>
+      <option value="Exploratory phase">Exploratory phase</option>
+    </select>
+    <select name="decisionMaker" required style="width:100%;padding:.6rem;margin:.4rem 0;border:1px solid #ced4da;border-radius:4px;background:#ffffff;color:#212529">
+      <option value="" style="background:#ffffff;color:#212529">Your Role in Decision Making</option>
+      <option value="Final decision maker">Final decision maker</option>
+      <option value="Influencer">Influencer</option>
+      <option value="Evaluator">Evaluator</option>
+      <option value="End user">End user</option>
+      <option value="Other">Other</option>
+    </select>
+    <button type="submit">Generate My Report</button>
+  </form>
+</section>
+
+<section id="report" class="hide">
+  <div id="ai-out"></div>
+  <div class="hide-print" style="margin-top:1rem">
+    <button onclick="downloadAndSendPDF()">Save PDF</button>
+    <button onclick="location.href = (typeof basePath !== 'undefined' && basePath ? `${basePath}/assessment` : '/assessment')">← Back to assessments</button>
+  </div>
+</section>
+
+<script>
+/* ----------  CONFIG  ---------- */
+const params = new URLSearchParams(location.search);
+const quizId = params.get('q');
+if (!quizId) location.href = 'index.html';
+
+let cfg, idx = 0, scores = [], userData = {}, budgetData = {}, currentReportData = null;
+let assessmentStarted = false;
+
+// Warn user before leaving/refreshing if assessment is in progress
+window.addEventListener('beforeunload', function(e) {
+  if (assessmentStarted && !currentReportData) {
+    e.preventDefault();
+    e.returnValue = 'Your assessment progress will be lost. Are you sure you want to leave?';
+    return e.returnValue;
+  }
+});
+
+// Email validation
+const personalEmailDomains = [
+  'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'live.com',
+  'aol.com', 'icloud.com', 'mail.com', 'protonmail.com', 'zoho.com',
+  'yandex.com', 'gmx.com', 'inbox.com', 'mail.ru', 'qq.com',
+  '163.com', '126.com', 'yeah.net', 'sina.com', 'rediffmail.com'
+];
+
+function isCompanyEmail(email) {
+  if (!email || !email.includes('@')) return false;
+  const domain = email.split('@')[1].toLowerCase();
+  return !personalEmailDomains.includes(domain);
+}
+
+function validateEmail() {
+  const emailInput = document.getElementById('emailInput');
+  const emailError = document.getElementById('emailError');
+  const startBtn = document.getElementById('startBtn');
+  const email = emailInput.value.trim();
+  
+  if (email && !isCompanyEmail(email)) {
+    emailInput.classList.add('invalid');
+    emailError.classList.add('show');
+    startBtn.disabled = true;
+    return false;
+  } else if (email) {
+    emailInput.classList.remove('invalid');
+    emailError.classList.remove('show');
+    startBtn.disabled = false;
+    return true;
+  } else {
+    emailInput.classList.remove('invalid');
+    emailError.classList.remove('show');
+    startBtn.disabled = true;
+    return false;
+  }
+}
+
+// Attach email validation on input
+document.addEventListener('DOMContentLoaded', function() {
+  const emailInput = document.getElementById('emailInput');
+  if (emailInput) {
+    emailInput.addEventListener('input', validateEmail);
+    emailInput.addEventListener('blur', validateEmail);
+  }
+});
+
+// Use apiBase if available (injected by server), otherwise fallback to /api
+const apiBaseForFetch = typeof apiBase !== 'undefined' ? apiBase : '/api';
+
+fetch(`${apiBaseForFetch}/config/${quizId}`)
+  .then(r => {
+    if (!r.ok) {
+      // Try to parse error response
+      return r.json().then(err => {
+        throw new Error(err.error || `HTTP ${r.status}: ${err.details || 'Failed to load assessment'}`);
+      }).catch(() => {
+        throw new Error(`HTTP ${r.status}: Failed to load assessment`);
+      });
+    }
+    return r.json();
+  })
+  .then(j => { 
+    if (!j || j.error) {
+      throw new Error(j.error || 'Invalid quiz configuration');
+    }
+    cfg = j; 
+    init(); 
+  })
+  .catch(err => {
+    console.error('Failed to load quiz config:', err);
+    showOfflineError(err.message || 'Quiz configuration not found');
+  });
+
+function init() {
+  // Title removed - header was removed from frontend
+}
+
+function start() {
+  updateProgress();
+  render();
+}
+
+/* ----------  PROGRESS BAR  ---------- */
+function updateProgress() {
+  const pct = (idx / cfg.questions.length) * 100;
+  document.getElementById('progress').style.width = `${pct}%`;
+}
+
+/* ----------  QUESTION RENDERER  (big buttons)  ---------- */
+function render() {
+  const total = cfg.questions.length;
+  const qText = cfg.questions[idx];
+  const labels = {
+    1: 'Strongly Disagree',
+    2: 'Disagree',
+    3: 'Neutral',
+    4: 'Agree',
+    5: 'Strongly Agree'
+  };
+  
+  // Get previously selected rating if any (from current question, not previous)
+  const selectedRating = 0; // Reset for each new question
+  const percentage = selectedRating ? (selectedRating / 5) * 100 : 0;
+  const radius = 45;
+  const circumference = 2 * Math.PI * radius; // ≈ 282.74
+  const offset = circumference - (percentage / 100) * circumference;
+  
+  const questionsCompleted = idx; // Questions answered so far
+  const questionProgress = (questionsCompleted / total) * 100;
+  const questionRadius = 45;
+  const questionCircumference = 2 * Math.PI * questionRadius;
+  const questionOffset = questionCircumference - (questionProgress / 100) * questionCircumference;
+  
+  document.getElementById('qbox').innerHTML = `
+    <div class="quiz-container">
+      <div class="question-progress-section">
+        <div class="question-progress-title">Assessment Progress</div>
+        <div class="question-progress-circular">
+          <svg viewBox="0 0 120 120">
+            <defs>
+              <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#000000;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle class="bg-circle" cx="60" cy="60" r="45"></circle>
+            <circle class="progress-circle" cx="60" cy="60" r="45" style="stroke-dasharray:${questionCircumference};stroke-dashoffset:${questionOffset}"></circle>
+          </svg>
+          <div class="count">${questionsCompleted}</div>
+          <div class="total-label">of ${total}</div>
+        </div>
+        <div class="question-progress-percentage">${Math.round(questionProgress)}% Complete</div>
+      </div>
+      <div class="quiz-content">
+        <div class="question-header">
+          <span class="question-number">Question ${idx + 1} of ${total}</span>
+        </div>
+        <div class="question-text">${qText}</div>
+        <div class="rating-grid">
+          ${[1,2,3,4,5].map(v=>{
+            const isSelected = selectedRating == v;
+            return `<div class="rating-btn ${isSelected ? 'selected' : ''}" data-val="${v}">${v}<br><small>${labels[v]}</small></div>`;
+          }).join('')}
+        </div>
+    </div>`;
+  
+  document.querySelectorAll('.rating-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      // Rating selection updated
+    };
+  });
+  updateProgress();
+}
+
+/* ----------  NAVIGATION  ---------- */
+document.getElementById('next').onclick = () => {
+  const selected = document.querySelector('.rating-btn.selected');
+  if (!selected) return alert('Please select a rating');
+  scores.push(+selected.dataset.val);
+  idx++;
+  if (idx < cfg.questions.length) { render(); }
+  else { showBudgetSection(); }
+};
+
+function showBudgetSection() {
+  document.getElementById('quiz').classList.add('hide');
+  document.getElementById('budget').classList.remove('hide');
+}
+
+function showReport() {
+  document.getElementById('quiz').classList.add('hide');
+  document.getElementById('report').classList.remove('hide');
+}
+
+/* ----------  FORM SUBMISSION - START QUIZ  ---------- */
+document.getElementById('lead').onsubmit = (e) => {
+  e.preventDefault();
+  
+  // Validate email one more time before submission
+  if (!validateEmail()) {
+    alert('Please provide a valid company email address. Personal emails are not accepted.');
+    return;
+  }
+  
+  userData = Object.fromEntries(new FormData(e.target));
+  assessmentStarted = true; // Track that assessment has started
+  document.getElementById('gate').classList.add('hide');
+  document.getElementById('quiz').classList.remove('hide');
+  start();
+};
+
+/* ----------  BUDGET FORM SUBMISSION  ---------- */
+document.getElementById('budgetForm').onsubmit = (e) => {
+  e.preventDefault();
+  budgetData = Object.fromEntries(new FormData(e.target));
+  generateReport();
+};
+
+/* ----------  LEAD CAPTURE + ANALYSIS  ---------- */
+async function generateReport() {
+  const data = { ...userData, ...budgetData };
+  data.scores = scores;
+  data.quizId = quizId;
+
+  document.getElementById('budget').classList.add('hide');
+  document.getElementById('report').classList.remove('hide');
+  document.getElementById('ai-out').innerHTML = `
+    <div class="loader-container">
+      <div class="loader-spinner"></div>
+      <div class="loader-dots">
+        <div class="loader-dot"></div>
+        <div class="loader-dot"></div>
+        <div class="loader-dot"></div>
+      </div>
+      <div class="loader-text">Analysing and generating your report</div>
+      <div class="loader-subtext">Our AI is processing your responses and creating a personalized assessment report...</div>
+    </div>
+  `;
+
+  /* const prompt = new Function('d', cfg.promptBuilder)(data); */
+  let body = cfg.promptBuilder.trim()
+             .replace(/^\s*function\s*\([^)]*\)\s*\{?/, '')
+             .replace(/\}\s*$/, '');
+  // body already starts with "return" → use as-is
+  const prompt = new Function('d', body)(data);
+
+  try {
+    const apiBaseForFetch = typeof apiBase !== 'undefined' ? apiBase : '/api';
+    
+    // Build complete assessment data for logging
+    const assessmentPayload = {
+      prompt,
+      formData: {
+        leadForm: {
+          decisionMaker: data.decisionMaker,
+          email: data.email,
+          company: data.company,
+          industry: data.industry,
+          employeeCount: data.employeeCount,
+          annualRevenue: data.annualRevenue
+        },
+        budgetForm: {
+          timeline: data.timeline,
+          projectBudget: data.projectBudget
+        }
+      },
+      assessment: {
+        uuid: data.quizId,
+        questions: cfg.questions,
+        ratings: data.scores,
+        questionsWithRatings: cfg.questions.map((q, i) => ({
+          question: q,
+          rating: data.scores[i],
+          ratingLabel: ['', 'Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'][data.scores[i]]
+        }))
+      }
+    };
+    
+    const res = await fetch(`${apiBaseForFetch}/analyse`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(assessmentPayload)
+    });
+    if (!res.ok) throw new Error('LLM unreachable');
+    const result = await res.json();
+    
+    if (result.success && result.data) {
+      currentReportData = result.data;  // Store for later use
+      
+      // Fetch benchmark data for visualizations
+      fetchBenchmarkData(data).then(benchmarkData => {
+        document.getElementById('ai-out').innerHTML = renderJsonReport(result.data, benchmarkData);
+        
+        // Render charts after HTML is inserted
+        if (benchmarkData) {
+          setTimeout(() => {
+            renderVisualizations(benchmarkData);
+          }, 100);
+        }
+      }).catch(err => {
+        console.warn('Failed to load benchmark data:', err);
+        document.getElementById('ai-out').innerHTML = renderJsonReport(result.data, null);
+      });
+      
+      // PDF will be downloaded and sent when user clicks "Save PDF" button
+    } else {
+      throw new Error(result.error || 'Unknown error');
+    }
+  } catch (err) {
+    console.warn('LLM failed – using client fallback', err);
+    const avg = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+    const level = maturityLabel(avg);
+    document.getElementById('ai-out').innerHTML = clientFallbackHtml(avg, level);
+  }
+};
+
+/* ----------  FETCH BENCHMARK DATA  ---------- */
+async function fetchBenchmarkData(formData) {
+  try {
+    const apiBaseForFetch = typeof apiBase !== 'undefined' ? apiBase : '/api';
+    const response = await fetch(`${apiBaseForFetch}/benchmarks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        quizId: formData.quizId,
+        industry: formData.industry,
+        scores: formData.scores
+      })
+    });
+    
+    if (!response.ok) throw new Error('Failed to fetch benchmarks');
+    const result = await response.json();
+    return result.success ? result.data : null;
+  } catch (err) {
+    console.warn('Benchmark fetch error:', err);
+    return null;
+  }
+}
+
+/* ----------  RENDER VISUALIZATIONS  ---------- */
+function renderVisualizations(benchmarkData) {
+  if (!benchmarkData) return;
+  
+  // Category Comparison Chart
+  const categoryCtx = document.getElementById('categoryChart');
+  if (categoryCtx) {
+    const categories = Object.keys(benchmarkData.userCategoryScores || {});
+    const userScores = categories.map(cat => benchmarkData.userCategoryScores[cat] || 0);
+    const industryScores = categories.map(cat => benchmarkData.industryCategoryScores[cat] || 0);
+    
+    new Chart(categoryCtx, {
+      type: 'bar',
+      data: {
+        labels: categories,
+        datasets: [{
+          label: 'Your Score',
+          data: userScores,
+          backgroundColor: '#000000',
+          borderColor: '#1a1a1a',
+          borderWidth: 1
+        }, {
+          label: `${benchmarkData.industry} Industry Average`,
+          data: industryScores,
+          backgroundColor: '#28a745',
+          borderColor: '#1e7e34',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 5,
+            ticks: { stepSize: 1 }
+          }
+        },
+        plugins: {
+          legend: { display: true, position: 'top' }
+        }
+      }
+    });
+  }
+  
+  // Trend Chart
+  const trendCtx = document.getElementById('trendChart');
+  if (trendCtx && benchmarkData.trendData) {
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const currentYear = new Date().getFullYear();
+    
+    const months = benchmarkData.trendData.map(d => {
+      const month = d.month || 1;
+      const year = d.year || currentYear;
+      const monthName = monthNames[month - 1] || `M${month}`;
+      
+      // Show year only if it's different from current year
+      if (year !== currentYear) {
+        return `${monthName} '${String(year).slice(-2)}`;
+      }
+      return monthName;
+    });
+    const trendScores = benchmarkData.trendData.map(d => d.score);
+    
+    new Chart(trendCtx, {
+      type: 'line',
+      data: {
+        labels: months,
+        datasets: [{
+          label: `${benchmarkData.industry} Industry Trend`,
+          data: trendScores,
+          borderColor: '#28a745',
+          backgroundColor: 'rgba(40, 167, 69, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 5,
+            ticks: { stepSize: 0.5 }
+          }
+        },
+        plugins: {
+          legend: { display: true, position: 'top' }
+        }
+      }
+    });
+  }
+}
+
+/* ----------  HELPER FUNCTIONS  ---------- */
+function getRoadmapTitle() {
+  if (!budgetData || !budgetData.timeline) return '12-Month';
+  
+  const timelineMap = {
+    'Immediate (0-3 months)': '3-Month',
+    'Short-term (3-6 months)': '6-Month',
+    'Medium-term (6-12 months)': '12-Month',
+    'Long-term (12+ months)': '18-Month',
+    'Exploratory phase': '6-Month'
+  };
+  
+  return timelineMap[budgetData.timeline] || '12-Month';
+}
+
+/* ----------  RENDER JSON REPORT  ---------- */
+function renderJsonReport(data, benchmarkData) {
+  const html = `
+    <div style="font-family:system-ui;line-height:1.6">
+      <div style="margin-bottom:2rem;padding:1.5rem;background:linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);border-radius:8px;border:1px solid #dee2e6">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+          <img src="https://botgobucket.s3.ap-south-1.amazonaws.com/maturity-assessment/glb-logo.png" alt="Globtier Logo" style="max-height:60px;max-width:150px" onerror="this.style.display='none'">
+          <div style="text-align:center;flex:1">
+            <h1 style="color:#000000;margin:0;font-size:1.8rem">Maturity Assessment Report</h1>
+            <p style="color:#666;margin:0.3rem 0;font-size:0.9rem">Professional Technology Consulting & AI-Powered Insights</p>
+          </div>
+          <img src="https://botgobucket.s3.ap-south-1.amazonaws.com/maturity-assessment/logo-kergan-black.png" alt="Botgo Logo" style="max-height:60px;max-width:150px" onerror="this.innerHTML='<div style=\\'font-size:1.2rem;font-weight:bold;color:#000\\'>BOTGO</div>'">
+        </div>
+      </div>
+      <h2>${cfg.title} – Assessment Report</h2>
+      
+      ${benchmarkData ? `
+        <div class="visualization-section">
+          <h3>Performance vs. ${benchmarkData.industry} Industry</h3>
+          <div class="score-comparison">
+            <div class="score-box you">
+              <div class="score-label">Your Score</div>
+              <div class="score-value">${benchmarkData.userScore}/5.0</div>
+              <div style="font-size:0.85rem;color:#666;margin-top:0.5rem">${benchmarkData.percentile}th Percentile</div>
+            </div>
+            <div class="score-box industry">
+              <div class="score-label">Industry Average</div>
+              <div class="score-value" style="color:#28a745">${benchmarkData.industryAverage}/5.0</div>
+              <div style="font-size:0.85rem;color:#666;margin-top:0.5rem">${benchmarkData.industry} Sector</div>
+            </div>
+          </div>
+          
+          ${Object.keys(benchmarkData.userCategoryScores || {}).length > 0 ? `
+            <div class="chart-container">
+              <h4>Category Comparison</h4>
+              <canvas id="categoryChart"></canvas>
+            </div>
+          ` : ''}
+          
+          ${benchmarkData.trendData && benchmarkData.trendData.length > 0 ? `
+            <div class="chart-container">
+              <h4>Industry Trend (Last 7 Months)</h4>
+              <canvas id="trendChart"></canvas>
+            </div>
+          ` : ''}
+        </div>
+      ` : ''}
+      
+      ${data.executiveSummary ? `
+        <div style="background:#f0f7ff;padding:1rem;border-radius:6px;margin:1rem 0;border-left:4px solid #000000">
+          <h3 style="margin-top:0">Executive Summary</h3>
+          <p>${data.executiveSummary}</p>
+        </div>
+      ` : ''}
+      
+      ${data.maturityLevel || data.overallScore ? `
+        <div style="display:flex;gap:2rem;margin:1.5rem 0;flex-wrap:wrap">
+          ${data.maturityLevel ? `
+            <div>
+              <strong>Maturity Level:</strong><br>
+              <span style="color:#000000;font-size:1.1rem">${data.maturityLevel}</span>
+            </div>
+          ` : ''}
+          ${data.overallScore !== undefined ? `
+            <div>
+              <strong>Overall Score:</strong><br>
+              <span style="color:#000000;font-size:1.1rem">${data.overallScore}/5.0</span>
+            </div>
+          ` : ''}
+        </div>
+      ` : ''}
+      
+      ${data.priorityActions && data.priorityActions.length > 0 ? `
+        <h3 style="margin-top:2rem;border-bottom:2px solid #000000;padding-bottom:0.5rem">Priority Actions</h3>
+        <div style="display:grid;gap:1rem;margin:1rem 0">
+          ${data.priorityActions.map((action, idx) => `
+            <div style="background:#ffffff;border:1px solid #e9ecef;border-radius:6px;padding:1rem">
+              <h4 style="margin:0 0 0.5rem 0;color:#000000">${idx + 1}. ${action.title || 'Action ' + (idx + 1)}</h4>
+              ${action.description ? `<p style="margin:0.5rem 0">${action.description}</p>` : ''}
+              <div style="display:flex;gap:1.5rem;margin-top:0.5rem;font-size:0.9rem;color:#666">
+                ${action.timeline ? `<span><strong>Timeline:</strong> ${action.timeline}</span>` : ''}
+                ${action.budget ? `<span><strong>Budget:</strong> ${action.budget}</span>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+      
+      ${data.roadmap && Object.keys(data.roadmap).length > 0 ? `
+        <h3 style="margin-top:2rem;border-bottom:2px solid #000000;padding-bottom:0.5rem">${getRoadmapTitle()} Strategic Roadmap</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1rem 0">
+          ${Object.entries(data.roadmap).map(([quarter, content]) => `
+            <div style="background:#f8f9fa;padding:1rem;border-radius:6px">
+              <strong style="color:#000000;text-transform:uppercase">${quarter}</strong>
+              <p style="margin:0.5rem 0 0 0">${content}</p>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+      
+      ${data.recommendations && data.recommendations.length > 0 ? `
+        <h3 style="margin-top:2rem;border-bottom:2px solid #000000;padding-bottom:0.5rem">Recommendations</h3>
+        <ul style="line-height:1.8">
+          ${data.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+        </ul>
+      ` : ''}
+      
+      ${data.keyFindings && data.keyFindings.length > 0 ? `
+        <h3 style="margin-top:2rem;border-bottom:2px solid #000000;padding-bottom:0.5rem">Key Findings</h3>
+        <ul style="line-height:1.8">
+          ${data.keyFindings.map(finding => `<li>${finding}</li>`).join('')}
+        </ul>
+      ` : ''}
+      
+      ${data.nextSteps && data.nextSteps.length > 0 ? `
+        <h3 style="margin-top:2rem;border-bottom:2px solid #000000;padding-bottom:0.5rem">Next Steps</h3>
+        <ul style="line-height:1.8">
+          ${data.nextSteps.map(step => `<li>${step}</li>`).join('')}
+        </ul>
+      ` : ''}
+      
+      ${data.note ? `
+        <div style="background:#fff3cd;padding:0.75rem;border-radius:6px;margin-top:1.5rem;border-left:4px solid #ffc107">
+          <small><em>${data.note}</em></small>
+        </div>
+      ` : ''}
+      
+      <div style="margin-top:3rem;padding:2rem;background:linear-gradient(135deg, #000000 0%, #1a1a1a 100%);border-radius:8px;color:#ffffff">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #ffffff">
+          <img src="https://botgobucket.s3.ap-south-1.amazonaws.com/maturity-assessment/glb-logo.png" alt="Globtier Logo" style="max-height:50px;max-width:120px;object-fit:contain;background:white;padding:8px;border-radius:6px" onerror="this.style.display='none'">
+          <h2 style="color:#ffffff;margin:0;flex:1;text-align:center">About Globtier & Botgo</h2>
+          <img src="https://botgobucket.s3.ap-south-1.amazonaws.com/maturity-assessment/logo-kergan-black.png" alt="Botgo Logo" style="max-height:50px;max-width:120px;object-fit:contain;filter:brightness(0) invert(1)" onerror="this.style.display='none'">
+        </div>
+        <div style="margin-top:1rem;line-height:1.8">
+          <h3 style="color:#ffffff;margin-top:1.5rem">Globtier</h3>
+          <p style="color:#e9ecef">Globtier is a leading technology consulting firm specializing in digital transformation, cloud adoption, cybersecurity, and AI implementation. With decades of combined experience, our team of certified experts helps organizations navigate complex technology challenges and achieve measurable business outcomes.</p>
+          
+          <h3 style="color:#ffffff;margin-top:1.5rem">Botgo</h3>
+          <p style="color:#e9ecef">Botgo is our intelligent automation and AI platform that powers assessment tools, business process automation, and intelligent decision support systems. Botgo leverages cutting-edge AI technologies to deliver personalized insights and recommendations at scale.</p>
+          
+          <h3 style="color:#ffffff;margin-top:1.5rem">Our Services</h3>
+          <ul style="color:#e9ecef;line-height:1.8">
+            <li><strong>Cloud Migration & Optimization:</strong> End-to-end cloud strategy, migration, and cost optimization services</li>
+            <li><strong>Cybersecurity & Compliance:</strong> Comprehensive security assessments, implementation, and managed security services</li>
+            <li><strong>AI & Automation:</strong> AI strategy, implementation, and intelligent automation solutions</li>
+            <li><strong>Application Modernization:</strong> Legacy application transformation and containerization</li>
+            <li><strong>Managed Services:</strong> 24/7 IT operations, monitoring, and support</li>
+          </ul>
+          
+          <div style="margin-top:2rem;padding:1.5rem;background:rgba(255,255,255,0.1);border-radius:6px;text-align:center">
+            <p style="color:#ffffff;font-size:1.1rem;margin:0.5rem 0"><strong>Ready to transform your organization?</strong></p>
+            <p style="color:#e9ecef;margin:0.5rem 0">Contact us today to discuss how we can help you achieve your goals.</p>
+            <p style="color:#ffffff;margin:1rem 0;font-size:1.1rem"><strong>📧 Email:</strong> sales@globtierinfotech.com</p>
+            <p style="color:#ffffff;margin:0.5rem 0;font-size:1.1rem"><strong>🌐 Website:</strong> www.globtierinfotech.com</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  return html;
+}
+
+/* ----------  CLIENT-SIDE FALLBACK  ---------- */
+function clientFallbackHtml(score, level) {
+  const title = cfg.title;
+  const list = fallbackCopy[cfg.id] || fallbackCopy._default;
+  return `
+    <div style="font-family:system-ui;line-height:1.6">
+      <h2>${title} – Offline Report</h2>
+      <p><strong>Score:</strong> ${score}/5 – <span style="color:#000000">${level}</span></p>
+      <h3>Priority Actions (Next 90 Days)</h3>
+      <ul>${list.map(l=>`<li>${l}</li>`).join('')}</ul>
+      <p><em>Connect Ollama or set OPENAI_KEY for deeper insights.</em></p>
+    </div>`;
+}
+function maturityLabel(n) {
+  if (n < 2) return 'Stage 1: Awareness';
+  if (n < 3) return 'Stage 2: Active';
+  if (n < 4) return 'Stage 3: Operational';
+  if (n < 5) return 'Stage 4: Systemic';
+  return 'Stage 5: Transformative';
+}
+
+/*  fallback copy bank – add new quiz ids here  */
+const fallbackCopy = {
+  cyber: [
+    'Create/up-to-date asset inventory & CMDB',
+    'Enforce MFA on all privileged accounts',
+    'Establish 14-day patch window policy'
+  ],
+  cloud: [
+    'Set up landing-zone with guard-rails',
+    'Migrate low-risk dev/test workloads',
+    'Implement cost visibility dashboard'
+  ],
+  cloudsec: [
+    'Enable organisation-wide CSPM scanning',
+    'Enforce least-privilege IAM + IAM-analyser',
+    'Rotate secrets via cloud-native vault'
+  ],
+  'ai-adopt': [
+    'Secure executive sponsor & dedicated budget',
+    'Build cross-functional AI governance council',
+    'Deliver data-readiness quick-scan'
+  ],
+  hyper: [
+    'Analyse current VMware/SQL licence burn',
+    'Right-size instances with AWS Compute Optimizer',
+    'Activate Azure Hybrid Benefit / AWS BYOL'
+  ],
+  modern: [
+    'Containerise stateless components first',
+    'Introduce CI/CD with automated security gates',
+    'Break monolith into domain-driven services'
+  ],
+  managed: [
+    'Document SOPs & run-books in central KB',
+    'Implement shift-left self-service portals',
+    'Negotiate outcome-based SLA constructs'
+  ],
+  datasec: [
+    'Classify data & apply DLP policies',
+    'Encrypt at rest with customer-managed keys',
+    'Deploy insider-risk analytics'
+  ],
+  _default: [
+    'Identify quick-win improvement areas',
+    'Build measurable success KPIs',
+    'Create 90-day execution roadmap'
+  ]
+};
+
+/* ----------  GENERATE PDF AND SEND EMAIL  ---------- */
+async function generateAndSendPDF(formData, reportData, benchmarkData = null) {
+  let statusDiv = document.getElementById('email-status');
+  if (!statusDiv) {
+    statusDiv = document.createElement('div');
+    statusDiv.id = 'email-status';
+    statusDiv.style.cssText = 'margin-top:1rem;padding:1rem;border-radius:6px;background:#f0f7ff;border-left:4px solid #000000';
+    document.getElementById('ai-out').appendChild(statusDiv);
+  }
+  statusDiv.innerHTML = '<p><strong>📧 Generating PDF and sending to your email...</strong></p>';
+  
+  try {
+    const apiBaseForFetch = typeof apiBase !== 'undefined' ? apiBase : '/api';
+    const response = await fetch(`${apiBaseForFetch}/pdf`, {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        company: formData.company,
+        industry: formData.industry,
+        quizId: formData.quizId,
+        scores: formData.scores,
+        reportData: reportData,
+        benchmarkData: benchmarkData
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      statusDiv.style.background = '#d4edda';
+      statusDiv.style.borderLeftColor = '#28a745';
+      statusDiv.innerHTML = `
+        <p><strong>✅ Success!</strong></p>
+        <p>Your assessment report has been generated and sent to <strong>${formData.email}</strong></p>
+        <p><small>Please check your inbox (and spam folder) for the PDF report.</small></p>
+      `;
+    } else {
+      throw new Error(result.error || 'Failed to send email');
+    }
+  } catch (err) {
+    console.error('PDF/Email error:', err);
+    statusDiv.style.background = '#f8d7da';
+    statusDiv.style.borderLeftColor = '#dc3545';
+    statusDiv.innerHTML = `
+      <p><strong>⚠️ Email Error</strong></p>
+      <p>Failed to send email: ${err.message}</p>
+      <p><small>Your report is still available above. You can use the browser's print function to save as PDF.</small></p>
+    `;
+  }
+}
+
+/* ----------  DOWNLOAD PDF AND SEND EMAIL  ---------- */
+async function downloadAndSendPDF() {
+  if (!userData || !userData.email || !currentReportData) {
+    alert('Please complete the assessment first.');
+    return;
+  }
+  
+  const data = { ...userData, ...budgetData };
+  data.scores = scores;
+  data.quizId = quizId;
+  
+  // Show status
+  let statusDiv = document.getElementById('email-status');
+  if (!statusDiv) {
+    statusDiv = document.createElement('div');
+    statusDiv.id = 'email-status';
+    statusDiv.style.cssText = 'margin-top:1rem;padding:1rem;border-radius:6px;background:#f0f7ff;border-left:4px solid #000000';
+    document.getElementById('ai-out').appendChild(statusDiv);
+  }
+  statusDiv.innerHTML = '<p><strong>📥 Generating and downloading PDF...</strong></p>';
+  
+  try {
+    // Fetch benchmark data if available
+    let benchmarkData = null;
+    try {
+      const apiBaseForFetch = typeof apiBase !== 'undefined' ? apiBase : '/api';
+      const benchmarkResponse = await fetch(`${apiBaseForFetch}/benchmarks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quizId: data.quizId,
+          industry: data.industry,
+          scores: data.scores
+        })
+      });
+      if (benchmarkResponse.ok) {
+        const benchmarkResult = await benchmarkResponse.json();
+        if (benchmarkResult.success) {
+          benchmarkData = benchmarkResult.data;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to fetch benchmark data:', err);
+    }
+    
+    // Step 1: Download the PDF
+    statusDiv.innerHTML = '<p><strong>📥 Downloading PDF...</strong></p>';
+    
+    const apiBaseForFetch = typeof apiBase !== 'undefined' ? apiBase : '/api';
+    const downloadResponse = await fetch(`${apiBaseForFetch}/pdf-download`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: data.name,
+        email: data.email,
+        company: data.company,
+        industry: data.industry,
+        quizId: data.quizId,
+        scores: data.scores,
+        reportData: currentReportData,
+        benchmarkData: benchmarkData
+      })
+    });
+    
+    if (!downloadResponse.ok) {
+      throw new Error('Failed to generate PDF');
+    }
+    
+    // Get the PDF blob
+    const pdfBlob = await downloadResponse.blob();
+    
+    // Trigger download
+    const url = window.URL.createObjectURL(pdfBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${cfg.title.replace(/\s+/g, '_')}_Assessment_Report.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    // Step 2: Send the same PDF via email
+    statusDiv.innerHTML = '<p><strong>📧 Sending PDF to your email...</strong></p>';
+    
+    // Convert blob to base64 for sending
+    const reader = new FileReader();
+    reader.onloadend = async function() {
+      const base64data = reader.result.split(',')[1];
+      
+      try {
+        const apiBaseForFetch = typeof apiBase !== 'undefined' ? apiBase : '/api';
+        const emailResponse = await fetch(`${apiBaseForFetch}/pdf-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: data.name,
+            email: data.email,
+            company: data.company,
+            industry: data.industry,
+            quizId: data.quizId,
+            pdfBase64: base64data,
+            pdfFilename: `${cfg.title.replace(/\s+/g, '_')}_Assessment_Report.pdf`
+          })
+        });
+        
+        const emailResult = await emailResponse.json();
+        
+        if (emailResult.success) {
+          statusDiv.style.background = '#d4edda';
+          statusDiv.style.borderLeftColor = '#28a745';
+          statusDiv.innerHTML = `
+            <p><strong>✅ Success!</strong></p>
+            <p>PDF downloaded and sent to <strong>${data.email}</strong></p>
+            <p><small>Please check your inbox (and spam folder) for the PDF report.</small></p>
+          `;
+        } else {
+          throw new Error(emailResult.error || 'Failed to send email');
+        }
+      } catch (err) {
+        console.error('Email sending error:', err);
+        statusDiv.style.background = '#fff3cd';
+        statusDiv.style.borderLeftColor = '#ffc107';
+        statusDiv.innerHTML = `
+          <p><strong>⚠️ Partial Success</strong></p>
+          <p>PDF downloaded successfully, but failed to send email: ${err.message}</p>
+          <p><small>You can manually forward the downloaded PDF if needed.</small></p>
+        `;
+      }
+    };
+    reader.readAsDataURL(pdfBlob);
+    
+  } catch (err) {
+    console.error('PDF download/email error:', err);
+    statusDiv.style.background = '#f8d7da';
+    statusDiv.style.borderLeftColor = '#dc3545';
+    statusDiv.innerHTML = `
+      <p><strong>⚠️ Error</strong></p>
+      <p>Failed to download PDF: ${err.message}</p>
+    `;
+  }
+}
+
+/* ----------  OFFLINE ERROR  ---------- */
+function showOfflineError(message) {
+  const errorMsg = message || 'Quiz configuration not found';
+  const backUrl = typeof basePath !== 'undefined' && basePath 
+    ? `${basePath}/assessment` 
+    : '/assessment';
+  document.body.innerHTML = `
+    <div style="text-align:center;margin-top:3rem;padding:2rem;max-width:600px;margin-left:auto;margin-right:auto">
+      <h2 style="color:#dc3545">⚠️ Failed to Load Assessment</h2>
+      <p style="color:#666;margin-top:1rem">${errorMsg}</p>
+      <p style="margin-top:1.5rem">
+        <a href="${backUrl}" style="color:#000000;text-decoration:none;font-weight:bold">← Back to Assessments</a>
+      </p>
+      <p style="color:#999;font-size:0.9rem;margin-top:1rem">If this problem persists, please check that the server is running and accessible.</p>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>

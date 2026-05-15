@@ -1,0 +1,5 @@
+@media print {
+  header,.hide-print{display:none}
+  body{background:#fff}
+  section{box-shadow:none;border:1px solid #ccc}
+}

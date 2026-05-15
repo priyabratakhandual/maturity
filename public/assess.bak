@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Assessment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body{font-family:system-ui;margin:0;background:#f5f7fb;color:#212529;line-height:1.6}
+    header{background:#0d6efd;color:#fff;padding:1.2rem;text-align:center}
+    section{max-width:720px;margin:2rem auto;padding:1.8rem;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    .likert{display:flex;flex-direction:column;gap:.6rem;margin:1rem 0}
+    .likert label{cursor:pointer;display:flex;align-items:center;gap:.5rem}
+    button{background:#0d6efd;color:#fff;border:0;padding:.6rem 1.4rem;border-radius:4px;cursor:pointer;font-size:1rem}
+    button:hover{opacity:.9}
+    input{width:100%;padding:.6rem;margin:.4rem 0;border:1px solid #ced4da;border-radius:4px}
+    #ai-out h2,#ai-out h3{margin-top:1.2rem}
+    #ai-out table{margin-top:.8rem;font-size:.9rem}
+    .hide{display:none}
+  </style>
+</head>
+<body>
+<header><h1 id="title">Loading…</h1></header>
+
+<!-- =====  QUESTION SCREEN  ===== -->
+<section id="quiz" class="active">
+  <div id="qbox"></div>
+  <button id="next">Next</button>
+</section>
+
+<!-- =====  EMAIL GATE  ===== -->
+<section id="gate" class="hide">
+  <h2>Get your personalised report</h2>
+  <form id="lead">
+    <input name="name" placeholder="Full name" required>
+    <input name="email" type="email" placeholder="Work email" required>
+    <input name="company" placeholder="Company" required>
+    <button type="submit">Generate report</button>
+  </form>
+</section>
+
+<!-- =====  REPORT OUTPUT  ===== -->
+<section id="report" class="hide">
+  <div id="ai-out"></div>
+  <div style="margin-top:1rem">
+    <button onclick="downloadPDF()">Save PDF</button>
+    <button onclick="location.href='index.html'">← Back to assessments</button>
+  </div>
+</section>
+
+<script>
+/* ----------  1.  CONFIG  ---------- */
+const params = new URLSearchParams(location.search);
+const quizId = params.get('q');
+if (!quizId) location.href = 'index.html';
+
+let cfg, idx = 0, scores = [];
+
+/* ----------  2.  LOAD QUIZ META  ---------- */
+fetch(`/api/config/${quizId}`)
+  .then(r => r.json())
+  .then(j => { cfg = j; start(); })
+  .catch(() => showOfflineError());
+
+function start() {
+  document.getElementById('title').textContent = cfg.title;
+  render();
+}
+
+/* ----------  3.  QUESTION RENDERER  ---------- */
+function render() {
+  const total = cfg.questions.length;
+  const qText = cfg.questions[idx];
+  document.getElementById('qbox').innerHTML = `
+    <p><strong>${idx + 1}/${total}</strong> ${qText}</p>
+    <div class="likert">
+      ${[1,2,3,4,5].map(v=>`
+        <label><input type="radio" name="q" value="${v}"> ${v} – ${v===1?'Strongly Disagree':v===5?'Strongly Agree':'Neutral'}</label>`).join('')}
+    </div>`;
+}
+
+/* ----------  4.  NAVIGATION  ---------- */
+document.getElementById('next').onclick = () => {
+  const val = document.querySelector('input[name="q"]:checked')?.value;
+  if (!val) return alert('Please select an answer');
+  scores.push(+val);
+  idx++;
+  idx < cfg.questions.length ? render() : showGate();
+};
+
+function showGate() {
+  document.getElementById('quiz').classList.add('hide');
+  document.getElementById('gate').classList.remove('hide');
+}
+
+/* ----------  5.  LEAD CAPTURE + ANALYSIS  ---------- */
+document.getElementById('lead').onsubmit = async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  data.scores = scores;
+  data.quizId = quizId;
+
+  document.getElementById('gate').classList.add('hide');
+  document.getElementById('report').classList.remove('hide');
+  document.getElementById('ai-out').innerText = 'Analysing…';
+
+  const prompt = new Function('d', cfg.promptBuilder)(data);
+
+  try {
+    const res = await fetch('/api/analyse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    if (!res.ok) throw new Error('LLM unreachable');
+    const html = (await res.json()).analysis;
+    document.getElementById('ai-out').innerHTML = html;
+  } catch (err) {
+    console.warn('LLM failed – using client fallback', err);
+    const avg = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1);
+    const level = maturityLabel(avg);
+    document.getElementById('ai-out').innerHTML = clientFallbackHtml(avg, level);
+  }
+};
+
+/* ----------  6.  CLIENT-SIDE FALLBACK  ---------- */
+function clientFallbackHtml(score, level) {
+  const title = cfg.title;
+  const list = fallbackCopy[cfg.id] || fallbackCopy._default;
+  return `
+    <div style="font-family:system-ui;line-height:1.6">
+      <h2>${title} – Offline Report</h2>
+      <p><strong>Score:</strong> ${score}/5 – <span style="color:#0d6efd">${level}</span></p>
+      <h3>Priority Actions (Next 90 Days)</h3>
+      <ul>${list.map(l=>`<li>${l}</li>`).join('')}</ul>
+      <p><em>Connect Ollama or set OPENAI_KEY for deeper insights.</em></p>
+    </div>`;
+}
+function maturityLabel(n) {
+  if (n < 2) return 'Stage 1: Awareness';
+  if (n < 3) return 'Stage 2: Active';
+  if (n < 4) return 'Stage 3: Operational';
+  if (n < 5) return 'Stage 4: Systemic';
+  return 'Stage 5: Transformative';
+}
+/*  fallback copy bank – add new quizzes here only  */
+const fallbackCopy = {
+  cyber: [
+    'Create/up-to-date asset inventory & CMDB',
+    'Enforce MFA on all privileged accounts',
+    'Establish 14-day patch window policy'
+  ],
+  cloud: [
+    'Set up landing-zone with guard-rails',
+    'Migrate low-risk dev/test workloads',
+    'Implement cost visibility dashboard'
+  ],
+  'ai-adopt': [
+    'Secure executive sponsor & dedicated budget',
+    'Build cross-functional AI governance council',
+    'Deliver data-readiness quick-scan'
+  ],
+  _default: [
+    'Identify quick-win improvement areas',
+    'Build measurable success KPIs',
+    'Create 90-day execution roadmap'
+  ]
+};
+
+/* ----------  7.  BROWSER PDF  (optional)  ---------- */
+function downloadPDF() {
+  window.print();          // simplest: use CSS media print
+}
+
+/* ----------  8.  OFFLINE ERROR  ---------- */
+function showOfflineError() {
+  document.body.innerHTML = '<p style="text-align:center;margin-top:3rem">Quiz config not found. <a href="index.html">Back to home</a></p>';
+}
+</script>
+</body>
+</html>
